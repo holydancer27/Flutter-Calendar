@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'extras.dart';
-import 'main.dart';
 
 class AddEvent extends StatelessWidget {
   final DateTime? rangeStart;
@@ -24,8 +23,10 @@ class AddEvent extends StatelessWidget {
     DateTime pickedDate_ = pickedDate ?? DateTime.now();
     bool allDay = true;
     bool isRange = rangeStart != null && rangeEnd != null; 
-    TimeOfDay? timeRangeStart;
-    TimeOfDay? timeRangeEnd;
+    TimeOfDay? timeRangeStart = TimeOfDay.now();
+    TimeOfDay? timeRangeEnd = TimeOfDay.now();
+    DateTime? rangeStart_ = rangeStart;
+    DateTime? rangeEnd_ = rangeEnd;
 
     // Function for showing the date picker
     Future<DateTime?> showAppDatePicker(BuildContext context, {DateTime? initialDate}) async {
@@ -125,12 +126,14 @@ class AddEvent extends StatelessWidget {
                                     final date = await showAppDatePicker(context, initialDate: pickedDate);
                                     if (date != null) {
                                       setState(() {
-                                        pickedDate_ = date;
+                                        isRange == false
+                                        ? pickedDate_ = date
+                                        : rangeStart_ = date;
                                       });
                                     }
                                   },
                                   child: Text(
-                                    rangeStart != null && rangeEnd != null
+                                    rangeStart_ != null && rangeEnd_ != null
                                       ? rangeStart.toString().split(' ')[0]
                                       : normalizeDate(pickedDate_).toString().split(' ')[0]
                                     ),
@@ -147,11 +150,7 @@ class AddEvent extends StatelessWidget {
                                       }
                                       
                                     }, 
-                                    child: Text(
-                                      timeRangeStart.toString() == 'null'
-                                        ? "${TimeOfDay.now().hour}:${TimeOfDay.now().minute}"
-                                        : "${timeRangeStart!.hour}:${timeRangeStart!.minute}",
-                                    )
+                                    child: Text("${timeRangeStart!.hour}:${timeRangeStart!.minute}")
                                   )
                                 ),
                               ],
@@ -169,8 +168,8 @@ class AddEvent extends StatelessWidget {
                                     }
                                   },
                                   child: Text(
-                                    rangeStart != null && rangeEnd != null
-                                      ? rangeEnd.toString().split(' ')[0]
+                                    rangeStart_ != null && rangeEnd_ != null
+                                      ? rangeEnd_.toString().split(' ')[0]
                                       : normalizeDate(pickedDate_).toString().split(' ')[0]
                                     ),
                                   ),
@@ -178,19 +177,22 @@ class AddEvent extends StatelessWidget {
                                   visible: !allDay,
                                   child: TextButton(
                                     onPressed: () async {
-                                      final time = await showAppTimePicker(context, initialTime: timeRangeStart);
+                                      // use timeRangeStart + 1 hour if available, otherwise now
+                                      final initial = timeRangeEnd != null
+                                        ? TimeOfDay(
+                                            hour: (timeRangeEnd!.hour + 1) % 24,
+                                            minute: timeRangeEnd!.minute,
+                                          )
+                                        : TimeOfDay.now();
+
+                                      final time = await showAppTimePicker(context, initialTime: initial);
                                       if (time != null) {
                                         setState(() {
                                           timeRangeEnd = time;
                                         });
                                       }
-                                      
-                                    }, 
-                                    child: Text(
-                                      timeRangeEnd.toString() == 'null'
-                                        ? "${TimeOfDay.now().hour}:${TimeOfDay.now().minute}"
-                                        : "${timeRangeEnd!.hour}:${timeRangeEnd!.minute}", 
-                                    ),
+                                    },
+                                    child: Text("${timeRangeEnd!.hour}:${timeRangeEnd!.minute}"),
                                   )
                                 ),
                               ],
@@ -238,20 +240,24 @@ class AddEvent extends StatelessWidget {
               userTime = null;
             }
             // If range is provided, add event for all days in range
-            if (rangeStart != null && rangeEnd != null) {
+            if (rangeStart_ != null && rangeEnd_ != null) {
               final event = Event(
                 title: userTitle,
                 description: userDescription,
                 timeRangeStart: userTime,
-                rangeStart: rangeStart,
-                rangeEnd: rangeEnd,
+                rangeStart: rangeStart_,
+                rangeEnd: rangeEnd_,
               );
-            
-              if(events[normalizeDate(rangeStart!)] != null){
-                events[normalizeDate(rangeStart!)]!.add(event);
+
+              if(events[normalizeDate(rangeStart_!)] != null){
+                events[normalizeDate(rangeStart_!)]!.add(event);
+              } else{
+                events[normalizeDate(rangeStart_!)] = [event];
               }
-              if(events[normalizeDate(rangeEnd!)] != null){
-                events[normalizeDate(rangeEnd!)]!.add(event);
+              if(events[normalizeDate(rangeEnd_)] != null){
+                events[normalizeDate(rangeEnd_)]!.add(event);
+              } else{
+                events[normalizeDate(rangeEnd_)] = [event];
               }
 
             } else {

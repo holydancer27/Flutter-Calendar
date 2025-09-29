@@ -181,13 +181,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       scrollDirection: Axis.horizontal,
                       itemCount: min(eventsForDay.length, 3),
                       itemBuilder: (context, index) {
+                        final event = eventsForDay[index] as Event;
                         return Container(
                           margin: const EdgeInsets.only(top: 40, left: 1),
                           padding: const EdgeInsets.all(1),
                           width: 7,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.blueAccent,
+                            color: (event.rangeStart != null && event.rangeEnd != null)
+                              ? Colors.grey
+                              : Colors.blueAccent,
                           ),
                         );
                       },
