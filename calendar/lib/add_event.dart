@@ -6,8 +6,9 @@ import 'main.dart';
 class AddEvent extends StatelessWidget {
   final DateTime? rangeStart;
   final DateTime? rangeEnd;
+  final DateTime? pickedDate;
 
-  const AddEvent({super.key, this.rangeStart, this.rangeEnd});
+  const AddEvent({super.key, this.rangeStart, this.rangeEnd, this.pickedDate});
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +16,14 @@ class AddEvent extends StatelessWidget {
   }
 
   Widget _buildAddEventScaffold(BuildContext context) {
-    final TextEditingController _controller = TextEditingController();
+
+    final TextEditingController controller = TextEditingController();
     String? userDescription;
     String userTitle = '';
     TimeOfDay? userTime;
-    DateTime pickedDate = DateTime.now();
+    DateTime pickedDate_ = pickedDate ?? DateTime.now();
     bool allDay = true;
+    bool isRange = rangeStart != null && rangeEnd != null; 
     TimeOfDay? timeRangeStart;
     TimeOfDay? timeRangeEnd;
 
@@ -98,7 +101,17 @@ class AddEvent extends StatelessWidget {
                                 });
                               },
                             ),
-                            Text("Tutto il giorno")
+                            Text("Tutto il giorno"),
+                            SizedBox(width: 15),
+                            Switch(
+                              value: isRange, 
+                              onChanged: (value) {
+                                setState(() {
+                                  isRange = value;
+                                });
+                              },
+                            ),
+                            Text("Più giorni"),
                           ],
                         ),
                         SizedBox(height: 15),
@@ -112,14 +125,14 @@ class AddEvent extends StatelessWidget {
                                     final date = await showAppDatePicker(context, initialDate: pickedDate);
                                     if (date != null) {
                                       setState(() {
-                                        pickedDate = date;
+                                        pickedDate_ = date;
                                       });
                                     }
                                   },
                                   child: Text(
                                     rangeStart != null && rangeEnd != null
                                       ? rangeStart.toString().split(' ')[0]
-                                      : normalizeDate(pickedDate).toString().split(' ')[0]
+                                      : normalizeDate(pickedDate_).toString().split(' ')[0]
                                     ),
                                   ),
                                 Visibility(
@@ -151,14 +164,14 @@ class AddEvent extends StatelessWidget {
                                     final date = await showAppDatePicker(context, initialDate: pickedDate);
                                     if (date != null) {
                                       setState(() {
-                                        pickedDate = date;
+                                        pickedDate_ = date;
                                       });
                                     }
                                   },
                                   child: Text(
                                     rangeStart != null && rangeEnd != null
                                       ? rangeEnd.toString().split(' ')[0]
-                                      : normalizeDate(pickedDate).toString().split(' ')[0]
+                                      : normalizeDate(pickedDate_).toString().split(' ')[0]
                                     ),
                                   ),
                                 Visibility(
@@ -195,7 +208,7 @@ class AddEvent extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (userTitle.isEmpty || (rangeStart == null && pickedDate == null)) {
+          if (userTitle.isEmpty) {
             showDialog(
               context: context,
               builder: (BuildContext context) => AlertDialog(
@@ -208,7 +221,7 @@ class AddEvent extends StatelessWidget {
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("Titolo e data sono campi obbligatori")
+                    Text("Titolo è obbligatorio")
                   ],
                 ),
                 actions: [
@@ -229,7 +242,7 @@ class AddEvent extends StatelessWidget {
               final event = Event(
                 title: userTitle,
                 description: userDescription,
-                timeOfDay_: userTime,
+                timeRangeStart: userTime,
                 rangeStart: rangeStart,
                 rangeEnd: rangeEnd,
               );
@@ -246,9 +259,9 @@ class AddEvent extends StatelessWidget {
               final event = Event(
                 title: userTitle,
                 description: userDescription,
-                timeOfDay_: userTime,
+                timeRangeStart: userTime,
               );
-              final normalized = normalizeDate(pickedDate);
+              final normalized = normalizeDate(pickedDate_);
               if (events[normalized] != null) {
                 events[normalized]!.add(event);
               } else {
@@ -256,7 +269,7 @@ class AddEvent extends StatelessWidget {
               }
             }
             Navigator.of(context).pop();
-            _controller.clear();
+            controller.clear();
             userTitle = '';
             userDescription = null;
           }

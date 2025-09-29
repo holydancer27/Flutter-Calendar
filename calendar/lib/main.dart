@@ -205,8 +205,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemBuilder: (context, index) {
                       final event = events[normalizeDate(_selectedDay!)]![index];
                       String timeText = '';
-                      if (event.timeOfDay_ != null) {
-                        timeText = "${event.timeOfDay_!.hour.toString().padLeft(2, '0')}:${event.timeOfDay_!.minute.toString().padLeft(2, '0')} - ";
+                      if (event.timeRangeStart != null) {
+                        timeText = "${event.timeRangeStart!.hour.toString().padLeft(2, '0')}:${event.timeRangeStart!.minute.toString().padLeft(2, '0')} - ";
                       }
                       return Card(
                         margin: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
@@ -263,6 +263,7 @@ class _MyHomePageState extends State<MyHomePage> {
               builder: (context) => AddEvent(
                 rangeStart: rangeStart,
                 rangeEnd: rangeEnd,
+                pickedDate: _selectedDay,
               ),
             ),
           );

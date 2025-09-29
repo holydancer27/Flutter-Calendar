@@ -5,10 +5,11 @@ Map<DateTime, List<Event>> events = {};
 class Event {
   final DateTime? rangeStart;
   final DateTime? rangeEnd;
-  final TimeOfDay? timeOfDay_;
+  final TimeOfDay? timeRangeStart;
+  final TimeOfDay? timeRangeEnd;
   final String title;
   final String? description;
-  const Event({required this.title, required this.description, this.timeOfDay_, this.rangeStart, this.rangeEnd});
+  const Event({required this.title, required this.description, this.timeRangeStart, this.timeRangeEnd, this.rangeStart, this.rangeEnd});
 }
 
 List<DateTime> daysInRange(DateTime first, DateTime last){
