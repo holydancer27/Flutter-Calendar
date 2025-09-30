@@ -19,12 +19,11 @@ class AddEvent extends StatelessWidget {
     final TextEditingController controller = TextEditingController();
     String? userDescription;
     String userTitle = '';
-    TimeOfDay? userTime;
     DateTime pickedDate_ = pickedDate ?? DateTime.now();
     bool allDay = true;
     bool isRange = rangeStart != null && rangeEnd != null; 
     TimeOfDay? timeRangeStart = TimeOfDay.now();
-    TimeOfDay? timeRangeEnd = TimeOfDay.now();
+    TimeOfDay? timeRangeEnd = TimeOfDay(hour: (TimeOfDay.now().hour + 1) % 24, minute: TimeOfDay.now().minute);
     DateTime? rangeStart_ = rangeStart;
     DateTime? rangeEnd_ = rangeEnd;
 
@@ -50,6 +49,7 @@ class AddEvent extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        title: Text("Aggiungi Evento"),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Builder(
@@ -133,8 +133,8 @@ class AddEvent extends StatelessWidget {
                                     }
                                   },
                                   child: Text(
-                                    rangeStart_ != null && rangeEnd_ != null
-                                      ? rangeStart.toString().split(' ')[0]
+                                    rangeStart_ != null
+                                      ? rangeStart_.toString().split(' ')[0]
                                       : normalizeDate(pickedDate_).toString().split(' ')[0]
                                     ),
                                   ),
@@ -163,12 +163,14 @@ class AddEvent extends StatelessWidget {
                                     final date = await showAppDatePicker(context, initialDate: pickedDate);
                                     if (date != null) {
                                       setState(() {
-                                        pickedDate_ = date;
+                                        isRange == false
+                                        ? pickedDate_ = date
+                                        : rangeEnd_ = date;
                                       });
                                     }
                                   },
                                   child: Text(
-                                    rangeStart_ != null && rangeEnd_ != null
+                                    rangeEnd_ != null
                                       ? rangeEnd_.toString().split(' ')[0]
                                       : normalizeDate(pickedDate_).toString().split(' ')[0]
                                     ),
@@ -177,15 +179,11 @@ class AddEvent extends StatelessWidget {
                                   visible: !allDay,
                                   child: TextButton(
                                     onPressed: () async {
-                                      // use timeRangeStart + 1 hour if available, otherwise now
-                                      final initial = timeRangeEnd != null
-                                        ? TimeOfDay(
-                                            hour: (timeRangeEnd!.hour + 1) % 24,
-                                            minute: timeRangeEnd!.minute,
-                                          )
-                                        : TimeOfDay.now();
-
-                                      final time = await showAppTimePicker(context, initialTime: initial);
+                                      final time = await showTimePicker(
+                                        context: context, 
+                                        initialTime: timeRangeEnd!,
+                                        initialEntryMode: TimePickerEntryMode.dialOnly,
+                                      );
                                       if (time != null) {
                                         setState(() {
                                           timeRangeEnd = time;
@@ -210,11 +208,12 @@ class AddEvent extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (userTitle.isEmpty) {
+          if (userTitle.isEmpty || timeRangeStart!.isAfter(timeRangeEnd!)) {
             showDialog(
               context: context,
               builder: (BuildContext context) => AlertDialog(
                 title: Row(
+                  spacing: 10,
                   children: [
                     Icon(Icons.error, color: Colors.red, size: 32,),
                     Text("Errore")
@@ -223,7 +222,17 @@ class AddEvent extends StatelessWidget {
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("Titolo è obbligatorio")
+                    Text(
+                      textAlign: TextAlign.left,
+                      userTitle.isEmpty
+                      ? "Il titolo è obbligatorio."
+                      : ""
+                    ),
+                    Text(
+                      timeRangeStart!.isAfter(timeRangeEnd!)
+                      ? "L'orario di inizio non può essere successivo a quello di fine."
+                      : ""
+                    ),
                   ],
                 ),
                 actions: [
@@ -237,14 +246,16 @@ class AddEvent extends StatelessWidget {
             return;
           } else {
             if (allDay) {
-              userTime = null;
+              timeRangeStart = null;
+              timeRangeEnd = null;
             }
             // If range is provided, add event for all days in range
-            if (rangeStart_ != null && rangeEnd_ != null) {
+            if (isRange) {
               final event = Event(
                 title: userTitle,
                 description: userDescription,
-                timeRangeStart: userTime,
+                timeRangeStart: timeRangeStart,
+                timeRangeEnd: timeRangeEnd,
                 rangeStart: rangeStart_,
                 rangeEnd: rangeEnd_,
               );
@@ -254,10 +265,10 @@ class AddEvent extends StatelessWidget {
               } else{
                 events[normalizeDate(rangeStart_!)] = [event];
               }
-              if(events[normalizeDate(rangeEnd_)] != null){
-                events[normalizeDate(rangeEnd_)]!.add(event);
+              if(events[normalizeDate(rangeEnd_!)] != null){
+                events[normalizeDate(rangeEnd_!)]!.add(event);
               } else{
-                events[normalizeDate(rangeEnd_)] = [event];
+                events[normalizeDate(rangeEnd_!)] = [event];
               }
 
             } else {
@@ -265,7 +276,8 @@ class AddEvent extends StatelessWidget {
               final event = Event(
                 title: userTitle,
                 description: userDescription,
-                timeRangeStart: userTime,
+                timeRangeStart: timeRangeStart,
+                timeRangeEnd: timeRangeEnd,
               );
               final normalized = normalizeDate(pickedDate_);
               if (events[normalized] != null) {

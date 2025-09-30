@@ -207,9 +207,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemCount: events[normalizeDate(_selectedDay!)]!.length,
                     itemBuilder: (context, index) {
                       final event = events[normalizeDate(_selectedDay!)]![index];
-                      String timeText = '';
-                      if (event.timeRangeStart != null) {
-                        timeText = "${event.timeRangeStart!.hour.toString().padLeft(2, '0')}:${event.timeRangeStart!.minute.toString().padLeft(2, '0')} - ";
+                      String timeRangeStartTxt = '';
+                      String timeRangeEndTxt = '';
+                      if (event.timeRangeStart != null && event.timeRangeEnd != null) {
+                        timeRangeStartTxt = "${event.timeRangeStart!.hour.toString().padLeft(2, '0')}:${event.timeRangeStart!.minute.toString().padLeft(2, '0')} - ";
+                        timeRangeEndTxt = "${event.timeRangeEnd!.hour.toString().padLeft(2, '0')}:${event.timeRangeEnd!.minute.toString().padLeft(2, '0')}";
                       }
                       return Card(
                         margin: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
@@ -223,7 +225,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                               ),
                               SizedBox(width: 8),
-                              Text(timeText,
+                              Text(event.rangeStart != null && event.rangeEnd != null
+                                ? _selectedDay == event.rangeStart
+                                  ? timeRangeStartTxt
+                                  : _selectedDay == event.rangeEnd
+                                    ? timeRangeEndTxt
+                                    : "finisce il ${event.rangeEnd!.day}/${event.rangeEnd!.month}"
+                                : timeRangeStartTxt + timeRangeEndTxt, 
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey,
@@ -237,9 +245,26 @@ class _MyHomePageState extends State<MyHomePage> {
                             tooltip: 'Rimuovi evento',
                             onPressed: () {
                               setState(() {
+                                final ev = events[normalizeDate(_selectedDay!)]![index];
                                 events[normalizeDate(_selectedDay!)]!.removeAt(index);
+                                
                                 if (events[normalizeDate(_selectedDay!)]!.isEmpty) {
                                   events.remove(normalizeDate(_selectedDay!));
+                                }
+                                if (ev.rangeStart != null && ev.rangeEnd != null) {
+
+                                  if (events[normalizeDate(ev.rangeStart!)] != null) {
+                                    events[normalizeDate(ev.rangeStart!)]!.remove(ev);
+                                    if (events[normalizeDate(ev.rangeStart!)]!.isEmpty) {
+                                      events.remove(normalizeDate(ev.rangeStart!));
+                                    }
+                                  }
+                                  if (events[normalizeDate(ev.rangeEnd!)] != null) {
+                                    events[normalizeDate(ev.rangeEnd!)]!.remove(ev);
+                                    if (events[normalizeDate(ev.rangeEnd!)]!.isEmpty) {
+                                      events.remove(normalizeDate(ev.rangeEnd!));
+                                    }
+                                  }
                                 }
                               });
                             },
