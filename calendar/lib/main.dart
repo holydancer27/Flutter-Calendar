@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'db_manager.dart';
 
 
 void main() {
@@ -226,11 +227,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                               SizedBox(width: 8),
                               Text(event.rangeStart != null && event.rangeEnd != null
-                                ? _selectedDay == event.rangeStart
-                                  ? timeRangeStartTxt
-                                  : _selectedDay == event.rangeEnd
+                                ? normalizeDate(_selectedDay!) == normalizeDate(event.rangeStart!)
+                                  ? "$timeRangeStartTxt finisce il ${event.rangeEnd!.day}/${event.rangeEnd!.month}"
+                                  : normalizeDate(_selectedDay!) == normalizeDate(event.rangeEnd!)
                                     ? timeRangeEndTxt
-                                    : "finisce il ${event.rangeEnd!.day}/${event.rangeEnd!.month}"
+                                    : ""
                                 : timeRangeStartTxt + timeRangeEndTxt, 
                                 style: TextStyle(
                                   fontSize: 12,

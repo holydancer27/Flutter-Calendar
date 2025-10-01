@@ -150,7 +150,7 @@ class AddEvent extends StatelessWidget {
                                       }
                                       
                                     }, 
-                                    child: Text("${timeRangeStart!.hour}:${timeRangeStart!.minute}")
+                                    child: Text("${timeRangeStart!.hour.toString().padLeft(2, '0')}:${timeRangeStart!.minute.toString().padLeft(2, '0')}")
                                   )
                                 ),
                               ],
@@ -190,7 +190,7 @@ class AddEvent extends StatelessWidget {
                                         });
                                       }
                                     },
-                                    child: Text("${timeRangeEnd!.hour}:${timeRangeEnd!.minute}"),
+                                    child: Text("${timeRangeEnd!.hour.toString().padLeft(2, '0')}:${timeRangeEnd!.minute.toString().padLeft(2, '0')}"),
                                   )
                                 ),
                               ],
