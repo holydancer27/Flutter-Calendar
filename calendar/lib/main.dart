@@ -82,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   DateTime? rangeStart;
   DateTime? rangeEnd;
   RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOn;
+  DatabaseManager db = DatabaseManager();
 
   @override
   void dispose() {
