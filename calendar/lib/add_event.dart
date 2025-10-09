@@ -41,26 +41,30 @@ class AddEvent extends StatelessWidget {
     Future<DateTime?> showAppDatePicker(
       BuildContext context, {
       DateTime? initialDate,
+      DateTime? pickedDate_,
     }) async {
-      return await showDatePicker(
+      pickedDate_ = await showDatePicker(
         context: context,
         initialDate: initialDate ?? DateTime.now(),
         locale: const Locale('it', 'IT'),
         firstDate: DateTime(1970, 1, 1),
         lastDate: DateTime(DateTime.now().year + 10, 1, 1),
       );
+      return pickedDate_;
     }
 
     // Function for showing the time picker
     Future<TimeOfDay?> showAppTimePicker(
       BuildContext context, {
       TimeOfDay? initialTime,
+      TimeOfDay? pickedTime_,
     }) async {
-      return await showTimePicker(
+      pickedTime_ = await showTimePicker(
         context: context,
         initialEntryMode: TimePickerEntryMode.dialOnly,
         initialTime: initialTime ?? TimeOfDay.now(),
       );
+      return pickedTime_;
     }
 
     return Scaffold(
