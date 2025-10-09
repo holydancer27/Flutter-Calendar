@@ -1,5 +1,5 @@
 import 'dart:ffi';
-import 'dart:min';
+import 'dart:math';
 import 'add_event.dart';
 import 'extras.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -173,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           return ListView.builder(
                             shrinkWrap: true,
                             scrollDirection: Axis.horizontal,
-                            itemCount: min(eventsForDay.length, 3),
+                            itemCount: min(eventsForDay.length, 4),
                             itemBuilder: (context, index) {
                               final event = eventsForDay[index] as Event;
                               return Container(
