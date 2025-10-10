@@ -40,7 +40,9 @@ class DatabaseManager {
   // Insert a new event
   Future<int> insertEvent(Event event) async {
     final db = await database;
-    return await db.insert('Events', event.toMap());
+    final eventMap = event.toMap();
+    final result = await db.insert('Events', eventMap);
+    return result;
   }
 
   // Get all events

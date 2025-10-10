@@ -24,7 +24,6 @@ class Event {
   // Convert Event to Map for database insertion
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'title': title,
       'description': description,
       'rangeStart': rangeStart?.toIso8601String(),
